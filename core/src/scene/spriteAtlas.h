@@ -3,7 +3,7 @@
 #include <map>
 #include <memory>
 #include "gl/texture.h"
-#include "glm/glm.hpp"
+#include "glm/vec2.hpp"
 
 namespace Tangram {
 

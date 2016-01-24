@@ -18,6 +18,7 @@ class DataLayer;
 class FontContext;
 class Light;
 class MapProjection;
+class Marker;
 class SpriteAtlas;
 class View;
 struct Stops;
@@ -43,6 +44,7 @@ public:
     auto& stops() { return m_stops; }
     auto& background() { return m_background; }
     auto& fontContext() { return m_fontContext; }
+    auto& markers() { return m_markers; }
 
     const auto& dataSources() const { return m_dataSources; };
     const auto& layers() const { return m_layers; };
@@ -51,6 +53,8 @@ public:
     const auto& functions() const { return m_jsFunctions; };
     const auto& mapProjection() const { return m_mapProjection; };
     const auto& fontContext() const { return m_fontContext; }
+    const auto& spriteAtlases() const { return m_spriteAtlases; };
+    const auto& textures() const { return m_textures; };
 
     const Style* findStyle(const std::string& _name) const;
     const Light* findLight(const std::string& _name) const;
@@ -72,6 +76,7 @@ private:
     std::vector<std::shared_ptr<DataSource>> m_dataSources;
     std::vector<std::unique_ptr<Style>> m_styles;
     std::vector<std::unique_ptr<Light>> m_lights;
+    std::vector<std::shared_ptr<Marker>> m_markers;
     std::unordered_map<std::string, std::shared_ptr<Texture>> m_textures;
     std::unordered_map<std::string, std::shared_ptr<SpriteAtlas>> m_spriteAtlases;
 

@@ -131,7 +131,7 @@ void Texture::setDirty(size_t _yoff, size_t _height) {
     }
 }
 
-void Texture::bind(GLuint _unit) {
+void Texture::bind(GLuint _unit) const {
     RenderState::textureUnit(_unit);
     RenderState::texture(m_target, m_glHandle);
 }

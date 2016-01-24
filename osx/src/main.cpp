@@ -36,6 +36,7 @@ double last_y_velocity = 0.0;
 using namespace Tangram;
 
 std::shared_ptr<ClientGeoJsonSource> data_source;
+std::shared_ptr<Marker> marker;
 LngLat last_point;
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
@@ -81,28 +82,16 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         }
     } else if ((time - last_time_pressed) < single_tap_time) {
         // Single tap recognized
+
+        // Remove previous marker
+        // Tangram::removeMarker(marker);
+
+        // Add new marker
         LngLat p1 {x, y};
         Tangram::screenToWorldCoordinates(p1.longitude, p1.latitude);
+        marker = Tangram::createMarker("pois", "sunburst");
+        marker->setCoordinates(p1.longitude, p1.latitude);
 
-        if (!(last_point == LngLat{0, 0})) {
-            LngLat p2 = last_point;
-            logMsg("add line %f %f - %f %f\n",
-                   p1.longitude, p1.latitude,
-                   p2.longitude, p2.latitude);
-
-            // data_source->addLine(Properties{{"type", "line" }}, {p1, p2});
-            // data_source->addPoint(Properties{{"type", "point" }}, p2);
-            Properties prop1;
-            prop1.set("type", "line");
-            data_source->addLine(prop1, {p1, p2});
-            Properties prop2;
-            prop2.set("type", "point");
-            data_source->addPoint(prop2, p2);
-        }
-        last_point = p1;
-
-        // Tangram::clearDataSource(*data_source, false, true);
-        // This updates the tiles (maybe we need a recalcTiles())
         requestRender();
     }
 

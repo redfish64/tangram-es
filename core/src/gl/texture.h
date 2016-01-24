@@ -53,7 +53,7 @@ public:
     unsigned int getWidth() const { return m_width; }
     unsigned int getHeight() const { return m_height; }
 
-    void bind(GLuint _unit);
+    void bind(GLuint _unit) const;
 
     void setDirty(size_t yOffset, size_t height);
 

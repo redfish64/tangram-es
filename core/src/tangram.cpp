@@ -7,13 +7,13 @@
 #include "style/material.h"
 #include "style/style.h"
 #include "labels/labels.h"
+#include "markers/markerBatch.h"
 #include "tile/tileManager.h"
 #include "tile/tile.h"
 #include "gl/error.h"
 #include "gl/shaderProgram.h"
 #include "gl/renderState.h"
 #include "gl/primitives.h"
-#include "gl/hardware.h"
 #include "util/inputHandler.h"
 #include "tile/tileCache.h"
 #include "view/view.h"
@@ -45,6 +45,7 @@ std::shared_ptr<View> m_view;
 std::unique_ptr<Labels> m_labels;
 std::unique_ptr<Skybox> m_skybox;
 std::unique_ptr<InputHandler> m_inputHandler;
+std::unique_ptr<MarkerBatch> m_markerBatch;
 
 std::array<Ease, 4> m_eases;
 enum class EaseField { position, zoom, rotation, tilt };
@@ -87,6 +88,9 @@ void initialize(const char* _scenePath) {
 
     // label setup
     m_labels = std::make_unique<Labels>();
+
+    // Create a marker batch
+    m_markerBatch = std::make_unique<MarkerBatch>();
 
     loadScene(_scenePath, true);
 
@@ -233,6 +237,12 @@ void render() {
             style->onEndDrawFrame();
         }
     }
+
+    m_markerBatch->begin(*m_view);
+    for (const auto& marker : m_scene->markers()) {
+        m_markerBatch->draw(*marker);
+    }
+    m_markerBatch->end();
 
     m_labels->drawDebug(*m_view);
 
@@ -453,6 +463,22 @@ void clearDataSource(DataSource& _source, bool _data, bool _tiles) {
     if (_data) { _source.clearData(); }
 
     requestRender();
+}
+
+std::shared_ptr<Marker> createMarker(const std::string& _texture, const std::string& _sprite) {
+    auto marker = std::make_shared<Marker>(*m_scene, _texture, _sprite);
+    m_scene->markers().push_back(marker);
+    return marker;
+}
+
+bool removeMarker(std::shared_ptr<Marker> _marker) {
+    auto& markers = m_scene->markers();
+    auto removed = std::remove(markers.begin(), markers.end(), _marker);
+    if (removed != markers.end()) {
+        markers.erase(removed, markers.end());
+        return true;
+    }
+    return false;
 }
 
 void handleTapGesture(float _posX, float _posY) {

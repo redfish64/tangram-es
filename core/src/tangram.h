@@ -2,6 +2,7 @@
 
 #include "debug.h"
 #include "data/properties.h"
+#include "markers/marker.h"
 #include "util/ease.h"
 #include <memory>
 #include <vector>
@@ -92,6 +93,24 @@ void addDataSource(std::shared_ptr<DataSource> _source);
 int removeDataSource(DataSource& _source);
 
 void clearDataSource(DataSource& _source, bool _data, bool _tiles);
+
+std::shared_ptr<Marker> createMarker(const std::string& _texture, const std::string& _sprite);
+
+bool removeMarker(std::shared_ptr<Marker> _marker);
+
+// int addMarker(const std::string& _texture, const std::string& _sprite);
+
+// bool removeMarker(int _id);
+
+// float getMarkerRotation(int _id);
+
+// void setMarkerRotation(int _id, float _radians);
+// void setMarkerRotation(int _id, float _radians, float _duration, EaseType _e = EaseType::quint);
+
+// void getMarkerPosition(int _id, double& _lon, double& _lat);
+
+// void setMarkerPosition(int _id, double _lon, double _lat);
+// void setMarkerPosition(int _id, double _lon, double _lat, float _duration, EaseType _e = EaseType::quint);
 
 // Respond to a tap at the given screen coordinates (x right, y down)
 void handleTapGesture(float _posX, float _posY);
