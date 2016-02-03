@@ -3,6 +3,7 @@
 #include "gl/renderState.h"
 #include "gl/shaderProgram.h"
 #include "gl/vertexLayout.h"
+#include "gl/texture.h"
 #include "markers/marker.h"
 #include "view/view.h"
 
@@ -73,14 +74,14 @@ void MarkerBatch::draw(const Marker& _marker) {
 
     const auto& projection = m_view->getMapProjection();
     auto origin = glm::dvec2(m_view->getPosition());
-    auto coordinates = glm::dvec2(_marker.coordinates().longitude, _marker.coordinates().latitude);
-    auto position = projection.LonLatToMeters(coordinates) - origin;
+    auto position = projection.LonLatToMeters(_marker.coordinates()) - origin;
     auto sprite = _marker.sprite();
+    auto size = _marker.size();
 
     float x = position.x, y = position.y;
-    float u1 = sprite.m_uvBL.x, u2 = sprite.m_uvTR.x;
-    float v1 = sprite.m_uvBL.y, v2 = sprite.m_uvTR.y;
-    float w = sprite.m_size.x, h = sprite.m_size.y;
+    float u1 = sprite[0], u2 = sprite[2];
+    float v1 = sprite[1], v2 = sprite[3];
+    float w = size.x, h = size.y;
 
     uint16_t offset = m_vertices.size();
 

@@ -87,13 +87,13 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         // Tangram::removeMarker(marker);
 
         // Add new marker
-        LngLat p1 {x, y};
-        Tangram::screenToWorldCoordinates(p1.longitude, p1.latitude);
+        glm::dvec2 point {x, y};
+        Tangram::screenToWorldCoordinates(point.x, point.y);
         if (marker) {
-            marker->setCoordinates(p1.longitude, p1.latitude, 1, EaseType::cubic);
+            marker->setCoordinates(point.x, point.y, 1, EaseType::cubic);
         } else {
             marker = Tangram::createMarker("pois", "sunburst");
-            marker->setCoordinates(p1.longitude, p1.latitude);
+            marker->setCoordinates(point.x, point.y);
         }
 
         requestRender();

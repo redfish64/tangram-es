@@ -1,7 +1,5 @@
 #include "markers/marker.h"
 
-#include "glm/vec2.hpp"
-#include "glm/vec4.hpp"
 #include "platform.h"
 #include "scene/scene.h"
 #include "scene/spriteAtlas.h"
@@ -14,10 +12,12 @@ Marker::Marker(const Scene& _scene, const std::string& _texture, const std::stri
 
     // Locate the sprite that this marker will use
     {
+        SpriteNode node;
         const auto& atlases = _scene.spriteAtlases();
         auto it = atlases.find(_texture);
-        if (it != atlases.end()) {
-            it->second->getSpriteNode(_sprite, m_sprite);
+        if (it != atlases.end() && it->second->getSpriteNode(_sprite, node)) {
+            m_uvs = { node.m_uvBL.x, node.m_uvBL.y, node.m_uvTR.x, node.m_uvTR.y };
+            m_size = node.m_size;
         }
     }
 
@@ -34,13 +34,13 @@ Marker::Marker(const Scene& _scene, const std::string& _texture, const std::stri
 
 void Marker::setCoordinates(double _lng, double _lat) {
 
-    m_coordinates = LngLat(_lng, _lat);
+    m_coordinates = { _lng, _lat };
 
 }
 
 void Marker::setCoordinates(double _lng, double _lat, float _duration, EaseType _e) {
 
-    glm::dvec2 start { m_coordinates.longitude, m_coordinates.latitude };
+    glm::dvec2 start { m_coordinates };
     glm::dvec2 end { _lng, _lat };
     auto cb = [=](float t) {
         auto pos = ease(start, end, t, _e);

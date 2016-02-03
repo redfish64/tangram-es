@@ -1,10 +1,10 @@
 #pragma once
 
+#include "glm/vec2.hpp"
+#include "glm/vec4.hpp"
+#include "util/ease.h"
 #include <memory>
 #include <string>
-#include "scene/spriteAtlas.h"
-#include "util/types.h"
-#include "util/ease.h"
 
 namespace Tangram {
 
@@ -19,7 +19,8 @@ public:
 
     const auto& coordinates() const { return m_coordinates; }
     const auto& rotation() const { return m_rotation; }
-    const auto& sprite() const { return m_sprite; }
+    const auto& size() const { return m_size; }
+    const auto& sprite() const { return m_uvs; }
     const auto& texture() const { return m_texture; }
 
     void setCoordinates(double _lng, double _lat);
@@ -31,9 +32,10 @@ public:
 protected:
 
     std::shared_ptr<Texture> m_texture;
+    glm::dvec2 m_coordinates;
+    glm::vec4 m_uvs;
+    glm::vec2 m_size;
     Ease m_ease;
-    SpriteNode m_sprite;
-    LngLat m_coordinates;
     float m_rotation;
 
 };
