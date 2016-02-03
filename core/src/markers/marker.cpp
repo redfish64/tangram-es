@@ -2,6 +2,7 @@
 
 #include "glm/vec2.hpp"
 #include "glm/vec4.hpp"
+#include "platform.h"
 #include "scene/scene.h"
 #include "scene/spriteAtlas.h"
 
@@ -37,9 +38,31 @@ void Marker::setCoordinates(double _lng, double _lat) {
 
 }
 
+void Marker::setCoordinates(double _lng, double _lat, float _duration, EaseType _e) {
+
+    glm::dvec2 start { m_coordinates.longitude, m_coordinates.latitude };
+    glm::dvec2 end { _lng, _lat };
+    auto cb = [=](float t) {
+        auto pos = ease(start, end, t, _e);
+        setCoordinates(pos.x, pos.y);
+        requestRender();
+    };
+    m_ease = Ease(_duration, cb);
+    requestRender();
+
+}
+
 void Marker::setRotation(float _radians) {
 
     m_rotation = _radians;
+
+}
+
+void Marker::update(float _dt) {
+
+    if (!m_ease.finished()) {
+        m_ease.update(_dt);
+    }
 
 }
 

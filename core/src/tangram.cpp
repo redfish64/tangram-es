@@ -154,6 +154,10 @@ void update(float _dt) {
         if (!ease.finished()) { ease.update(_dt); }
     }
 
+    for (auto& marker : m_scene->markers()) {
+        marker->update(_dt);
+    }
+
     m_inputHandler->update(_dt);
 
     m_view->update();

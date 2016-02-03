@@ -5,7 +5,7 @@
 #include <memory>
 #include <signal.h>
 #include <stdlib.h>
- 
+
 // Forward declaration
 void init_main_window();
 
@@ -89,8 +89,12 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         // Add new marker
         LngLat p1 {x, y};
         Tangram::screenToWorldCoordinates(p1.longitude, p1.latitude);
-        marker = Tangram::createMarker("pois", "sunburst");
-        marker->setCoordinates(p1.longitude, p1.latitude);
+        if (marker) {
+            marker->setCoordinates(p1.longitude, p1.latitude, 1, EaseType::cubic);
+        } else {
+            marker = Tangram::createMarker("pois", "sunburst");
+            marker->setCoordinates(p1.longitude, p1.latitude);
+        }
 
         requestRender();
     }

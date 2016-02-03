@@ -16,7 +16,7 @@ enum class EaseType : char {
 
 template<typename T>
 T ease(T _start, T _end, float _t, EaseType _e) {
-    float f = _t;
+    double f = _t;
     switch (_e) {
         case EaseType::cubic: f = (-2 * f + 3) * f * f; break;
         case EaseType::quint: f = (6 * f * f - 15 * f + 10) * f * f * f; break;
