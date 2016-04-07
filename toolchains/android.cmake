@@ -20,7 +20,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/external)
 # load core library
 add_subdirectory(${PROJECT_SOURCE_DIR}/core)
 
-set(ANDROID_PROJECT_DIR ${PROJECT_SOURCE_DIR}/android/tangram)
+set(ANDROID_PROJECT_DIR ${PROJECT_SOURCE_DIR}/android/tangram-android-sdk)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
 include(toolchains/android.gdb.cmake)
@@ -30,8 +30,8 @@ endif()
 set(LIB_NAME tangram) # in order to have libtangram.so
 
 add_library(${LIB_NAME} SHARED
-  ${CMAKE_SOURCE_DIR}/android/tangram/jni/jniExports.cpp
-  ${CMAKE_SOURCE_DIR}/android/tangram/jni/platform_android.cpp)
+  ${ANDROID_PROJECT_DIR}/jni/jniExports.cpp
+  ${ANDROID_PROJECT_DIR}/jni/platform_android.cpp)
 
 
 # https://code.google.com/p/android/issues/detail?id=68779
@@ -57,7 +57,7 @@ android_ndk_gdb_debuggable(${LIB_NAME})
 endif()
 
 # install to android library dir
-set(LIB_INSTALLATION_PATH ${CMAKE_SOURCE_DIR}/android/tangram/libs/${ANDROID_ABI})
+set(LIB_INSTALLATION_PATH ${ANDROID_PROJECT_DIR}/libs/${ANDROID_ABI})
 
 
 install(TARGETS ${LIB_NAME} DESTINATION ${LIB_INSTALLATION_PATH})

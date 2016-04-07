@@ -1,1 +1,1 @@
-include 'tangram', 'demo'
+include 'tangram-android-sdk', 'demo'
