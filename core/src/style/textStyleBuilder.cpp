@@ -47,7 +47,7 @@ void TextStyleBuilder::addFeatureCommon(const Feature& _feat, const DrawRule& _r
     TextStyle::Parameters params = applyRule(_rule, _feat.props, _iconText);
 
     Label::Type labelType;
-    if (_feat.geometryType == GeometryType::lines) {
+    if (_feat.geometry.type == GeometryType::lines) {
         labelType = Label::Type::line;
         params.wordWrap = false;
     } else {
@@ -60,14 +60,14 @@ void TextStyleBuilder::addFeatureCommon(const Feature& _feat, const DrawRule& _r
 
     if (!prepareLabel(params, labelType)) { return; }
 
-    if (_feat.geometryType == GeometryType::points) {
-        for (auto& point : _feat.points) {
+    if (_feat.geometry.type == GeometryType::points) {
+        for (auto& point : _feat.points()) {
             auto p = glm::vec2(point);
             addLabel(params, Label::Type::point, { p, p });
         }
 
-    } else if (_feat.geometryType == GeometryType::polygons) {
-        for (auto& polygon : _feat.polygons) {
+    } else if (_feat.geometry.type == GeometryType::polygons) {
+        for (auto& polygon : _feat.polygons()) {
             if (_iconText) {
                 auto p = centroid(polygon);
                 addLabel(params, Label::Type::point, { p, p });
@@ -81,12 +81,12 @@ void TextStyleBuilder::addFeatureCommon(const Feature& _feat, const DrawRule& _r
             }
         }
 
-    } else if (_feat.geometryType == GeometryType::lines) {
+    } else if (_feat.geometry.type == GeometryType::lines) {
 
         float pixel = 2.0 / (m_tileSize * m_style.pixelScale());
         float minLength = m_attributes.width * pixel * 0.2;
 
-        for (auto& line : _feat.lines) {
+        for (auto& line : _feat.lines()) {
             if (_iconText) {
                 for (auto& point : line) {
                     auto p = glm::vec2(point);
