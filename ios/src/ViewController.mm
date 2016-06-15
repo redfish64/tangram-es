@@ -1,28 +1,21 @@
 //
-//  ViewController.m
+//  ViewController.mm
 //  TangramiOS
 //
 //  Created by Matt Blair on 8/25/14.
-//  Copyright (c) 2014 Mapzen. All rights reserved.
+//  Updated by Matt Smollinger on 5/8/26.
+//  Copyright (c) 2016 Mapzen. All rights reserved.
 //
 
 #import "ViewController.h"
 #include "tangram.h"
 #include "platform_ios.h"
 
-@interface ViewController () {
+@interface ViewController ()
 
-}
-@property (strong, nonatomic) EAGLContext *context;
-@property CGFloat pixelScale;
-@property bool renderRequested;
-
-- (void)setupGL;
-- (void)tearDownGL;
-- (void)respondToTapGesture:(UITapGestureRecognizer *)tapRecognizer;
-- (void)respondToDoubleTapGesture:(UITapGestureRecognizer *)doubleTapRecognizer;
-- (void)respondToPanGesture:(UIPanGestureRecognizer *)panRecognizer;
-- (void)respondToPinchGesture:(UIPanGestureRecognizer *)pinchRecognizer;
+@property (nullable, strong, nonatomic) EAGLContext *context;
+@property (assign, nonatomic) CGFloat pixelScale;
+@property (assign, nonatomic) BOOL renderRequested;
 
 @end
 
@@ -34,13 +27,12 @@
     [super viewDidLoad];
 
     self.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-    self.pixelScale = [[UIScreen mainScreen] scale];
-    self.renderRequested = true;
-    self.continuous = false;
-
     if (!self.context) {
-        NSLog(@"Failed to create ES context");
+      NSLog(@"Failed to create ES context");
     }
+    self.pixelScale = [[UIScreen mainScreen] scale];
+    self.renderRequested = YES;
+    self.continuous = YES;
 
     init(self);
 
@@ -49,6 +41,13 @@
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     view.drawableMultisample = GLKViewDrawableMultisample4X;
 
+    [self setupGestureRecognizers];
+    [self setupGL];
+
+}
+
+- (void)setupGestureRecognizers {
+  
     /* Construct Gesture Recognizers */
     //1. Tap
     UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc]
@@ -56,37 +55,37 @@
     tapRecognizer.numberOfTapsRequired = 1;
     // TODO: Figure a way to have a delay set for it not to tap gesture not to wait long enough for a doubletap gesture to be recognized
     tapRecognizer.delaysTouchesEnded = NO;
-
+    
     //2. DoubleTap
     UITapGestureRecognizer *doubleTapRecognizer = [[UITapGestureRecognizer alloc]
-                                             initWithTarget:self action:@selector(respondToDoubleTapGesture:)];
+                                                   initWithTarget:self action:@selector(respondToDoubleTapGesture:)];
     doubleTapRecognizer.numberOfTapsRequired = 2;
     // Distanle single tap when double tap occurs
     [tapRecognizer requireGestureRecognizerToFail:doubleTapRecognizer];
-
+    
     //3. Pan
     UIPanGestureRecognizer *panRecognizer = [[UIPanGestureRecognizer alloc]
-                                            initWithTarget:self action:@selector(respondToPanGesture:)];
+                                             initWithTarget:self action:@selector(respondToPanGesture:)];
     panRecognizer.maximumNumberOfTouches = 1;
-
+    
     //4. Pinch
     UIPinchGestureRecognizer *pinchRecognizer = [[UIPinchGestureRecognizer alloc]
                                                  initWithTarget:self action:@selector(respondToPinchGesture:)];
-
+    
     //5. Rotate
     UIRotationGestureRecognizer *rotationRecognizer = [[UIRotationGestureRecognizer alloc]
-                                                        initWithTarget:self action:@selector(respondToRotationGesture:)];
-
+                                                       initWithTarget:self action:@selector(respondToRotationGesture:)];
+    
     //6. Shove
     UIPanGestureRecognizer *shoveRecognizer = [[UIPanGestureRecognizer alloc]
-                                             initWithTarget:self action:@selector(respondToShoveGesture:)];
+                                               initWithTarget:self action:@selector(respondToShoveGesture:)];
     shoveRecognizer.minimumNumberOfTouches = 2;
-
+    
     // Use the delegate method 'shouldRecognizeSimultaneouslyWithGestureRecognizer' for gestures that can be concurrent
     panRecognizer.delegate = self;
     pinchRecognizer.delegate = self;
     rotationRecognizer.delegate = self;
-
+    
     /* Setup gesture recognizers */
     [self.view addGestureRecognizer:tapRecognizer];
     [self.view addGestureRecognizer:doubleTapRecognizer];
@@ -94,9 +93,6 @@
     [self.view addGestureRecognizer:pinchRecognizer];
     [self.view addGestureRecognizer:rotationRecognizer];
     [self.view addGestureRecognizer:shoveRecognizer];
-
-    [self setupGL];
-
 }
 
 // Implement touchesBegan to catch down events
@@ -105,12 +101,11 @@
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-    id pan = [UIPanGestureRecognizer class];
     // make shove gesture exclusive
-    if ([gestureRecognizer class] == pan) {
+    if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
         return [gestureRecognizer numberOfTouches] != 2;
     }
-    if ([otherGestureRecognizer class] == pan) {
+    if ([otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
         return [otherGestureRecognizer numberOfTouches] != 2;
     }
     return YES;
@@ -172,8 +167,6 @@
 
 - (void)dealloc
 {
-    [self tearDownGL];
-
     if ([EAGLContext currentContext] == self.context) {
         [EAGLContext setCurrentContext:nil];
     }
@@ -185,8 +178,6 @@
 
     if ([self isViewLoaded] && ([[self view] window] == nil)) {
         self.view = nil;
-
-        [self tearDownGL];
 
         if ([EAGLContext currentContext] == self.context) {
             [EAGLContext setCurrentContext:nil];
@@ -213,10 +204,6 @@
     Tangram::setPixelScale(self.pixelScale);
 }
 
-- (void)tearDownGL
-{
-}
-
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     Tangram::resize(size.width * self.pixelScale, size.height * self.pixelScale);
@@ -226,12 +213,12 @@
 - (void)renderOnce
 {
     if (!self.continuous) {
-        self.renderRequested = true;
-        self.paused = false;
+        self.renderRequested = YES;
+        self.paused = NO;
     }
 }
 
-- (void)setContinuous:(bool)c
+- (void)setContinuous:(BOOL)c
 {
     _continuous = c;
     self.paused = !c;
@@ -244,9 +231,9 @@
     Tangram::update([self timeSinceLastUpdate]);
 
     if (!self.continuous && !self.renderRequested) {
-        self.paused = true;
+        self.paused = YES;
     }
-    self.renderRequested = false;
+    self.renderRequested = NO;
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect

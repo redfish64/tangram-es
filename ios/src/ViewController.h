@@ -9,11 +9,13 @@
 #import <UIKit/UIKit.h>
 #import <GLKit/GLKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
 struct TileID;
-
 @interface ViewController : GLKViewController <UIGestureRecognizerDelegate>
 
-@property (nonatomic) bool continuous;
+@property (assign, nonatomic) BOOL continuous;
+
 - (void)renderOnce;
 
 @end
+NS_ASSUME_NONNULL_END
