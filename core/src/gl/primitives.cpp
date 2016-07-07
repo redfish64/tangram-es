@@ -44,13 +44,14 @@ void init() {
 void saveState() {
     // save the current gl state
     GL_CHECK(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*) &s_boundBuffer));
-    RenderState::depthTest(GL_FALSE);
-    RenderState::vertexBuffer(0);
+    auto renderState = RenderState::get();
+    renderState->depthTest(GL_FALSE);
+    renderState->vertexBuffer(0);
 }
 
 void popState() {
     // undo modification on the gl states
-    RenderState::vertexBuffer(s_boundBuffer);
+    RenderState::get()->vertexBuffer(s_boundBuffer);
 }
 
 void drawLine(const glm::vec2& _origin, const glm::vec2& _destination) {

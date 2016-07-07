@@ -101,13 +101,15 @@ void TextDisplay::draw(const std::string& _text, int _posx, int _posy) {
 void TextDisplay::draw(const std::vector<std::string>& _infos) {
     GLint boundbuffer = -1;
 
-    RenderState::culling(GL_FALSE);
-    RenderState::blending(GL_FALSE);
-    RenderState::depthTest(GL_FALSE);
-    RenderState::depthWrite(GL_FALSE);
+    auto renderState = RenderState::get();
+
+    renderState->culling(GL_FALSE);
+    renderState->blending(GL_FALSE);
+    renderState->depthTest(GL_FALSE);
+    renderState->depthWrite(GL_FALSE);
 
     GL_CHECK(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*) &boundbuffer));
-    RenderState::vertexBuffer(0);
+    renderState->vertexBuffer(0);
 
     m_shader->use();
 
@@ -130,8 +132,8 @@ void TextDisplay::draw(const std::vector<std::string>& _infos) {
         offset -= 10;
     }
 
-    RenderState::culling(GL_TRUE);
-    RenderState::vertexBuffer(boundbuffer);
+    renderState->culling(GL_TRUE);
+    renderState->vertexBuffer(boundbuffer);
 }
 
 }

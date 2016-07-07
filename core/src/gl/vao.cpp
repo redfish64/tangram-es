@@ -35,15 +35,16 @@ void Vao::init(ShaderProgram& _program, const std::vector<std::pair<uint32_t, ui
     }
 
     int vertexOffset = 0;
+    auto renderState = RenderState::get();
     for (size_t i = 0; i < _vertexOffsets.size(); ++i) {
         auto vertexIndexOffset = _vertexOffsets[i];
         int nVerts = vertexIndexOffset.second;
         GL_CHECK(glBindVertexArray(m_glVAOs[i]));
 
-        RenderState::vertexBuffer.init(_vertexBuffer, true);
+        renderState->vertexBuffer.init(_vertexBuffer, true);
 
         if (_indexBuffer != 0) {
-            RenderState::indexBuffer.init(_indexBuffer, true);
+            renderState->indexBuffer.init(_indexBuffer, true);
         }
 
         // Enable vertex layout on the specified locations

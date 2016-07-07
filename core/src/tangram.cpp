@@ -321,17 +321,19 @@ bool Map::update(float _dt) {
 
 void Map::render() {
 
+    auto renderState = RenderState::get();
+
     FrameInfo::beginFrame();
 
     // Invalidate render states for new frame
     if (!m_cacheGlState) {
-        RenderState::invalidate();
+        renderState->invalidate();
     }
 
     // Set up openGL for new frame
-    RenderState::depthWrite(GL_TRUE);
+    renderState->depthWrite(GL_TRUE);
     auto& color = m_scene->background();
-    RenderState::clearColor(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f);
+    renderState->clearColor(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f);
     GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     for (const auto& style : m_scene->styles()) {
@@ -595,8 +597,9 @@ void Map::setupGL() {
     // Reconfigure the render states. Increases context 'generation'.
     // The OpenGL context has been destroyed since the last time resources were
     // created, so we invalidate all data that depends on OpenGL object handles.
-    RenderState::increaseGeneration();
-    RenderState::invalidate();
+    auto renderState = RenderState::get();
+    renderState->increaseGeneration();
+    renderState->invalidate();
 
     // Set default primitive render color
     Primitives::setColor(0xffffff);

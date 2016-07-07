@@ -53,13 +53,13 @@ void Style::build(const Scene& _scene) {
         default:
             break;
     }
-    
+
     if (m_blend == Blending::inlay) {
         m_shaderProgram->addSourceBlock("defines", "#define TANGRAM_BLEND_INLAY\n", false);
     } else if (m_blend == Blending::overlay) {
         m_shaderProgram->addSourceBlock("defines", "#define TANGRAM_BLEND_OVERLAY\n", false);
     }
-    
+
     if (m_material.material) {
         m_material.uniforms = m_material.material->injectOnProgram(*m_shaderProgram);
     }
@@ -86,6 +86,9 @@ void Style::setLightingType(LightingType _type) {
 }
 
 void Style::setupShaderUniforms(Scene& _scene) {
+
+    auto renderState = RenderState::get();
+
     for (auto& uniformPair : m_styleUniforms) {
         const auto& name = uniformPair.first;
         auto& value = uniformPair.second;
@@ -100,10 +103,10 @@ void Style::setupShaderUniforms(Scene& _scene) {
                 continue;
             }
 
-            texture->update(RenderState::nextAvailableTextureUnit());
-            texture->bind(RenderState::currentTextureUnit());
+            texture->update(renderState->nextAvailableTextureUnit());
+            texture->bind(renderState->currentTextureUnit());
 
-            m_shaderProgram->setUniformi(name, RenderState::currentTextureUnit());
+            m_shaderProgram->setUniformi(name, renderState->currentTextureUnit());
         } else {
 
             if (value.is<bool>()) {
@@ -131,10 +134,10 @@ void Style::setupShaderUniforms(Scene& _scene) {
                         continue;
                     }
 
-                    texture->update(RenderState::nextAvailableTextureUnit());
-                    texture->bind(RenderState::currentTextureUnit());
+                    texture->update(renderState->nextAvailableTextureUnit());
+                    texture->bind(renderState->currentTextureUnit());
 
-                    textureUniformArray.slots.push_back(RenderState::currentTextureUnit());
+                    textureUniformArray.slots.push_back(renderState->currentTextureUnit());
                 }
 
                 m_shaderProgram->setUniformi(name, textureUniformArray);
@@ -175,8 +178,10 @@ void Style::setupRasters(const std::vector<std::shared_ptr<DataSource>>& _dataSo
 
 void Style::onBeginDrawFrame(const View& _view, Scene& _scene) {
 
+    auto renderState = RenderState::get();
+
     // Reset the currently used texture unit to 0
-    RenderState::resetTextureUnit();
+    renderState->resetTextureUnit();
 
     // Set time uniforms style's shader programs
     m_shaderProgram->setUniformf(m_uTime, _scene.time());
@@ -208,35 +213,35 @@ void Style::onBeginDrawFrame(const View& _view, Scene& _scene) {
     // Configure render state
     switch (m_blend) {
         case Blending::none:
-            RenderState::blending(GL_FALSE);
-            RenderState::blendingFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            RenderState::depthTest(GL_TRUE);
-            RenderState::depthWrite(GL_TRUE);
+            renderState->blending(GL_FALSE);
+            renderState->blendingFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            renderState->depthTest(GL_TRUE);
+            renderState->depthWrite(GL_TRUE);
             break;
         case Blending::add:
-            RenderState::blending(GL_TRUE);
-            RenderState::blendingFunc(GL_ONE, GL_ONE);
-            RenderState::depthTest(GL_FALSE);
-            RenderState::depthWrite(GL_TRUE);
+            renderState->blending(GL_TRUE);
+            renderState->blendingFunc(GL_ONE, GL_ONE);
+            renderState->depthTest(GL_FALSE);
+            renderState->depthWrite(GL_TRUE);
             break;
         case Blending::multiply:
-            RenderState::blending(GL_TRUE);
-            RenderState::blendingFunc(GL_ZERO, GL_SRC_COLOR);
-            RenderState::depthTest(GL_FALSE);
-            RenderState::depthWrite(GL_TRUE);
+            renderState->blending(GL_TRUE);
+            renderState->blendingFunc(GL_ZERO, GL_SRC_COLOR);
+            renderState->depthTest(GL_FALSE);
+            renderState->depthWrite(GL_TRUE);
             break;
         case Blending::overlay:
-            RenderState::blending(GL_TRUE);
-            RenderState::blendingFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            RenderState::depthTest(GL_FALSE);
-            RenderState::depthWrite(GL_FALSE);
+            renderState->blending(GL_TRUE);
+            renderState->blendingFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            renderState->depthTest(GL_FALSE);
+            renderState->depthWrite(GL_FALSE);
             break;
         case Blending::inlay:
             // TODO: inlay does not behave correctly for labels because they don't have a z position
-            RenderState::blending(GL_TRUE);
-            RenderState::blendingFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            RenderState::depthTest(GL_TRUE);
-            RenderState::depthWrite(GL_FALSE);
+            renderState->blending(GL_TRUE);
+            renderState->blendingFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            renderState->depthTest(GL_TRUE);
+            renderState->depthWrite(GL_FALSE);
             break;
         default:
             break;
@@ -251,6 +256,8 @@ void Style::draw(const Tile& _tile) {
 
     TileID tileID = _tile.getID();
 
+    auto renderState = RenderState::get();
+
     if (hasRasters() && !_tile.rasters().empty()) {
         UniformTextureArray textureIndexUniform;
         UniformArray2f rasterSizeUniform;
@@ -259,7 +266,7 @@ void Style::draw(const Tile& _tile) {
         for (auto& raster : _tile.rasters()) {
             if (raster.isValid()) {
                 auto& texture = raster.texture;
-                auto texUnit = RenderState::nextAvailableTextureUnit();
+                auto texUnit = renderState->nextAvailableTextureUnit();
                 texture->update(texUnit);
                 texture->bind(texUnit);
 
@@ -301,7 +308,7 @@ void Style::draw(const Tile& _tile) {
     if (hasRasters()) {
         for (auto& raster : _tile.rasters()) {
             if (raster.isValid()) {
-                RenderState::releaseTextureUnit();
+                renderState->releaseTextureUnit();
             }
         }
     }

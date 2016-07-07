@@ -96,7 +96,7 @@ bool DynamicQuadMesh<T>::draw(ShaderProgram& _shader) {
     if (m_nVertices == 0) { return false; }
 
     // Bind buffers for drawing
-    RenderState::vertexBuffer(m_glVertexBuffer);
+    RenderState::get()->vertexBuffer(m_glVertexBuffer);
     QuadIndices::load();
 
     // Enable shader program

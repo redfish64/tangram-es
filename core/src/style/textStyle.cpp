@@ -74,7 +74,7 @@ void TextStyle::onBeginDrawFrame(const View& _view, Scene& _scene) {
 
     Style::onBeginDrawFrame(_view, _scene);
 
-    auto texUnit = RenderState::nextAvailableTextureUnit();
+    auto texUnit = RenderState::get()->nextAvailableTextureUnit();
 
     m_shaderProgram->setUniformf(m_uMaxStrokeWidth, m_context->maxStrokeWidth());
     m_shaderProgram->setUniformf(m_uTexScaleFactor, glm::vec2(1.0f / GlyphTexture::size));

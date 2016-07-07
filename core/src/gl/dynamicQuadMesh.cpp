@@ -16,11 +16,13 @@ void QuadIndices::ref() {
 void QuadIndices::unref() {
     meshCounter--;
 
-    if (quadIndexBuffer != 0 && (!RenderState::isValidGeneration(quadGeneration) ||
+    auto renderState = RenderState::get();
+
+    if (quadIndexBuffer != 0 && (!renderState->isValidGeneration(quadGeneration) ||
                                  meshCounter <= 0)) {
 
-        if (RenderState::indexBuffer.compare(quadIndexBuffer)) {
-            RenderState::indexBuffer.init(0, false);
+        if (renderState->indexBuffer.compare(quadIndexBuffer)) {
+            renderState->indexBuffer.init(0, false);
         }
         GL_CHECK(glDeleteBuffers(1, &quadIndexBuffer));
         quadIndexBuffer = 0;
@@ -29,13 +31,14 @@ void QuadIndices::unref() {
 }
 
 void QuadIndices::load() {
-    if (RenderState::isValidGeneration(quadGeneration)) {
+    auto renderState = RenderState::get();
+    if (renderState->isValidGeneration(quadGeneration)) {
 
-        RenderState::indexBuffer(quadIndexBuffer);
+        renderState->indexBuffer(quadIndexBuffer);
         return;
     }
 
-    quadGeneration = RenderState::generation();
+    quadGeneration = renderState->generation();
 
     std::vector<GLushort> indices;
     indices.reserve(maxVertices / 4 * 6);
@@ -50,7 +53,7 @@ void QuadIndices::load() {
     }
 
     GL_CHECK(glGenBuffers(1, &quadIndexBuffer));
-    RenderState::indexBuffer(quadIndexBuffer);
+    renderState->indexBuffer(quadIndexBuffer);
     GL_CHECK(glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLushort),
                  reinterpret_cast<GLbyte*>(indices.data()), GL_STATIC_DRAW));
 }

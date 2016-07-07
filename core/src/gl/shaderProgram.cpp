@@ -25,7 +25,8 @@ ShaderProgram::ShaderProgram() {
 
 ShaderProgram::~ShaderProgram() {
 
-    if (RenderState::isValidGeneration(m_generation)) {
+    auto renderState = RenderState::get();
+    if (renderState->isValidGeneration(m_generation)) {
         if (m_glProgram != 0) {
             GL_CHECK(glDeleteProgram(m_glProgram));
         }
@@ -40,8 +41,8 @@ ShaderProgram::~ShaderProgram() {
     }
     // Deleting a shader program being used ends up setting up the current shader program to 0
     // after the driver finishes using it, force this setup by setting the current program
-    if (RenderState::shaderProgram.compare(m_glProgram)) {
-        RenderState::shaderProgram.init(0, false);
+    if (renderState->shaderProgram.compare(m_glProgram)) {
+        renderState->shaderProgram.init(0, false);
     }
 
     m_attribMap.clear();
@@ -112,7 +113,7 @@ bool ShaderProgram::use() {
     valid &= (m_glProgram != 0);
 
     if (valid) {
-        RenderState::shaderProgram(m_glProgram);
+        RenderState::get()->shaderProgram(m_glProgram);
     }
 
     return valid;
@@ -121,7 +122,7 @@ bool ShaderProgram::use() {
 bool ShaderProgram::build() {
 
     m_needsBuild = false;
-    m_generation = RenderState::generation();
+    m_generation = RenderState::get()->generation();
 
     if (m_invalidShaderSource) { return false; }
 
@@ -320,7 +321,7 @@ std::string ShaderProgram::applySourceBlocks(const std::string& source, bool fra
 
 void ShaderProgram::checkValidity() {
 
-    if (!RenderState::isValidGeneration(m_generation)) {
+    if (!RenderState::get()->isValidGeneration(m_generation)) {
         m_glFragmentShader = 0;
         m_glVertexShader = 0;
         m_glProgram = 0;

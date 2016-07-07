@@ -36,17 +36,17 @@ MeshBase::MeshBase(std::shared_ptr<VertexLayout> _vertexLayout, GLenum _drawMode
 MeshBase::~MeshBase() {
     // Deleting a index/array buffer being used ends up setting up the current vertex/index buffer to 0
     // after the driver finishes using it, force the render state to be 0 for vertex/index buffer
-
-    if (RenderState::isValidGeneration(m_generation)) {
+    auto renderState = RenderState::get();
+    if (renderState->isValidGeneration(m_generation)) {
         if (m_glVertexBuffer) {
-            if (RenderState::vertexBuffer.compare(m_glVertexBuffer)) {
-                RenderState::vertexBuffer.init(0, false);
+            if (renderState->vertexBuffer.compare(m_glVertexBuffer)) {
+                renderState->vertexBuffer.init(0, false);
             }
             GL_CHECK(glDeleteBuffers(1, &m_glVertexBuffer));
         }
         if (m_glIndexBuffer) {
-            if (RenderState::indexBuffer.compare(m_glIndexBuffer)) {
-                RenderState::indexBuffer.init(0, false);
+            if (renderState->indexBuffer.compare(m_glIndexBuffer)) {
+                renderState->indexBuffer.init(0, false);
             }
             GL_CHECK(glDeleteBuffers(1, &m_glIndexBuffer));
         }
@@ -95,7 +95,7 @@ void MeshBase::subDataUpload(GLbyte* _data) {
 
     GLbyte* data = _data ? _data : m_glVertexData;
 
-    RenderState::vertexBuffer(m_glVertexBuffer);
+    RenderState::get()->vertexBuffer(m_glVertexBuffer);
 
     long vertexBytes = m_nVertices * m_vertexLayout->getStride();
 
@@ -122,6 +122,8 @@ void MeshBase::subDataUpload(GLbyte* _data) {
 
 void MeshBase::upload() {
 
+    auto renderState = RenderState::get();
+
     // Generate vertex buffer, if needed
     if (m_glVertexBuffer == 0) {
         GL_CHECK(glGenBuffers(1, &m_glVertexBuffer));
@@ -130,7 +132,7 @@ void MeshBase::upload() {
     // Buffer vertex data
     int vertexBytes = m_nVertices * m_vertexLayout->getStride();
 
-    RenderState::vertexBuffer(m_glVertexBuffer);
+    renderState->vertexBuffer(m_glVertexBuffer);
     GL_CHECK(glBufferData(GL_ARRAY_BUFFER, vertexBytes, m_glVertexData, m_hint));
 
     delete[] m_glVertexData;
@@ -143,7 +145,7 @@ void MeshBase::upload() {
         }
 
         // Buffer element index data
-        RenderState::indexBuffer(m_glIndexBuffer);
+        renderState->indexBuffer(m_glIndexBuffer);
 
         GL_CHECK(glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_nIndices * sizeof(GLushort), m_glIndexData, m_hint));
 
@@ -151,7 +153,7 @@ void MeshBase::upload() {
         m_glIndexData = nullptr;
     }
 
-    m_generation = RenderState::generation();
+    m_generation = renderState->generation();
 
     m_isUploaded = true;
 }
@@ -183,11 +185,13 @@ bool MeshBase::draw(ShaderProgram& _shader) {
             m_vaos->init(_shader, m_vertexOffsets, *m_vertexLayout, m_glVertexBuffer, m_glIndexBuffer);
         }
     } else {
+        auto renderState = RenderState::get();
+
         // Bind buffers for drawing
-        RenderState::vertexBuffer(m_glVertexBuffer);
+        renderState->vertexBuffer(m_glVertexBuffer);
 
         if (m_nIndices > 0) {
-            RenderState::indexBuffer(m_glIndexBuffer);
+            renderState->indexBuffer(m_glIndexBuffer);
         }
     }
 
@@ -228,13 +232,14 @@ bool MeshBase::draw(ShaderProgram& _shader) {
 }
 
 bool MeshBase::checkValidity() {
-    if (!RenderState::isValidGeneration(m_generation)) {
+    auto renderState = RenderState::get();
+    if (!renderState->isValidGeneration(m_generation)) {
         m_isUploaded = false;
         m_glVertexBuffer = 0;
         m_glIndexBuffer = 0;
         m_vaos.reset();
 
-        m_generation = RenderState::generation();
+        m_generation = renderState->generation();
 
         return false;
     }

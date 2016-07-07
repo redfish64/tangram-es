@@ -8,21 +8,26 @@
 
 namespace Tangram {
 
-namespace RenderState {
+class RenderState {
+
+public:
+
+    // Get the RenderState instance associated with the current thread.
+    static RenderState* get();
 
     /* Configure the render states */
     void increaseGeneration();
     void invalidate();
     /* Get the texture slot from a texture unit from 0 to TANGRAM_MAX_TEXTURE_UNIT-1 */
-    GLuint getTextureUnit(GLuint _unit);
+    static GLuint getTextureUnit(GLuint _unit);
     /* Bind a vertex buffer */
-    void bindVertexBuffer(GLuint _id);
+    static void bindVertexBuffer(GLuint _id);
     /* Bind an index buffer */
-    void bindIndexBuffer(GLuint _id);
-    /* Sets the currently active texture unit */
-    void activeTextureUnit(GLuint _unit);
+    static void bindIndexBuffer(GLuint _id);
     /* Bind a texture for the specified target */
-    void bindTexture(GLenum _target, GLuint _textureId);
+    static void bindTexture(GLenum _target, GLuint _textureId);
+    /* Sets the currently active texture unit */
+    static void activeTextureUnit(GLuint _unit);
 
     bool isValidGeneration(int _generation);
     int generation();
@@ -160,27 +165,31 @@ namespace RenderState {
 
 #undef FUN
 
-    extern DepthTest depthTest;
-    extern DepthWrite depthWrite;
-    extern Blending blending;
-    extern BlendingFunc blendingFunc;
-    extern StencilTest stencilTest;
-    extern StencilWrite stencilWrite;
-    extern StencilFunc stencilFunc;
-    extern StencilOp stencilOp;
-    extern ColorWrite colorWrite;
-    extern FrontFace frontFace;
-    extern CullFace cullFace;
-    extern Culling culling;
-    extern ShaderProgram shaderProgram;
+    DepthTest depthTest;
+    DepthWrite depthWrite;
+    Blending blending;
+    BlendingFunc blendingFunc;
+    StencilTest stencilTest;
+    StencilWrite stencilWrite;
+    StencilFunc stencilFunc;
+    StencilOp stencilOp;
+    ColorWrite colorWrite;
+    FrontFace frontFace;
+    CullFace cullFace;
+    Culling culling;
+    ShaderProgram shaderProgram;
+    VertexBuffer vertexBuffer;
+    IndexBuffer indexBuffer;
+    TextureUnit textureUnit;
+    Texture texture;
+    ClearColor clearColor;
 
-    extern VertexBuffer vertexBuffer;
-    extern IndexBuffer indexBuffer;
+private:
 
-    extern TextureUnit textureUnit;
-    extern Texture texture;
+    RenderState();
+    int m_validGeneration = 0;
+    int m_textureUnit = -1;
 
-    extern ClearColor clearColor;
-}
+};
 
 }
