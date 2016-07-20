@@ -260,7 +260,7 @@ bool Label::evalState(const glm::vec2& _screenSize, float _dt) {
             }
             break;
         case State::anchor_fallback:
-            if (m_occluded) {
+            if (m_occluded || m_occludedLastFrame) {
                 if (m_anchorFallbackCount >= m_options.anchorFallback.size()) {
                     m_fade.reset(false, m_options.hideTransition.ease,
                                         m_options.hideTransition.time);
@@ -287,7 +287,7 @@ bool Label::evalState(const glm::vec2& _screenSize, float _dt) {
                     enterState(State::sleep, 0.0);
                 }
             }
-            
+
             animate = true;
             break;
         case State::fading_in:
