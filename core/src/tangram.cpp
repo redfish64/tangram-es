@@ -556,6 +556,20 @@ int Map::getCameraType() {
 
 }
 
+void Map::setViewOffset(int xPixels, int yPixels) {
+
+    m_view->setOffset(xPixels, yPixels);
+
+}
+
+void Map::getViewOffset(int *xPixels, int *yPixels) {
+
+    auto offset = m_view->offset();
+    *xPixels = offset.x;
+    *yPixels = offset.y;
+
+}
+
 void Map::addDataSource(std::shared_ptr<DataSource> _source) {
     if (!m_tileManager) { return; }
     std::lock_guard<std::mutex> lock(m_tilesMutex);
